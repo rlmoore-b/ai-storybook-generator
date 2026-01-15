@@ -1,11 +1,10 @@
-# 🏗️ System Architecture
+# System Architecture
 
 ## Overview
 
 The AI Storybook Generator is a Flask-based web application that orchestrates multiple AI models to create personalized children's stories with illustrations and narration.
 
 ## Architecture Diagram
-
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   User Interface                        │
