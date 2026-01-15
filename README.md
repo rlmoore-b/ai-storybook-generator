@@ -4,7 +4,7 @@ An intelligent web application that creates personalized, illustrated children's
 
 ##  Features
 
-- ** Audio Interview Mode**: Interactive voice Q&A to personalize stories (NEW!)
+- ** Audio Interview Mode**: Interactive voice Q&A to personalize stories
 - ** AI-Generated Stories**: Creates unique, age-appropriate tales (ages 5-10)
 - ** Custom Illustrations**: DALL-E 3 generates consistent character artwork
 - ** Audio Narration**: Text-to-speech brings stories to life
