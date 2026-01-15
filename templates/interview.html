@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}Audio Interview - AI Storybook Generator{% endblock %}
+
+{% block extra_styles %}
+    .interview-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .interview-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .interview-header h1 {
+        font-family: 'Playfair Display', serif;
+        color: #1e3a8a;
+        font-size: 2.5em;
+        margin-bottom: 15px;
+    }
+
+    .interview-header p {
+        color: #6b7280;
+        font-size: 1.1em;
+        margin-bottom: 30px;
+    }
+
+    .question-display {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        padding: 30px;
+        border-radius: 16px;
+        margin: 30px 0;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .question-text {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6em;
+        color: #1e3a8a;
+        line-height: 1.5;
+    }
+
+    .audio-player-container {
+        margin: 25px 0;
+    }
+
+    .audio-player-container audio {
+        width: 100%;
+        max-width: 400px;
+        border-radius: 50px;
+    }
+
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 25px 0;
+    }
+
+    .progress-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        transform: scale(1.3);
+        box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+    }
+
+    .progress-dot.completed {
+        background: #10b981;
+    }
+
+    /* Recording Button */
+    .record-button {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 30px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+    }
+
+    .record-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 32px rgba(239, 68, 68, 0.5);
+    }
+
+    .record-button.recording {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        animation: pulse-record 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-record {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+
+    .record-button .icon {
+        font-size: 2.5em;
+    }
+
+    .record-button .label {
+        font-size: 0.85em;
+    }
+
+    .transcription-display {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        min-height: 60px;
+    }
+
+    .transcription-label {
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .transcription-text {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 1.1em;
+    }
+
+    .generating-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(30, 58, 138, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .generating-overlay.active {
+        display: flex;
+    }
+
+    .generating-content {
+        text-align: center;
+        color: white;
+    }
+
+    .generating-content h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5em;
+        margin: 20px 0;
+    }
+
+    .generating-content p {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .info-note {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: left;
+    }
+
+    .info-note p {
+        color: #92400e;
+        margin: 5px 0;
+        font-size: 0.95em;
+    }
+
+    @media (max-width: 768px) {
+        .interview-card {
+            padding: 30px 25px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+        }
+
+        .record-button {
+            width: 120px;
+            height: 120px;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="interview-container">
+    <div class="interview-card">
+        <div class="interview-header">
+            <h1>🎙️ Let's Chat About Your Story</h1>
+            <p>I'll ask you a couple questions to make your story extra special!</p>
+        </div>
+
+        <div class="info-note">
+            <p><strong>🎧 How it works:</strong></p>
+            <p>1. Listen to my question (it will play automatically)</p>
+            <p>2. Click the red microphone button to record your answer</p>
+            <p>3. Click the stop button when you're done speaking</p>
+            <p><em>Note: The audio will pause automatically when you start recording!</em></p>
+        </div>
+
+        <div class="progress-indicator" id="progressDots">
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+        </div>
+
+        <div class="question-display">
+            <p class="question-text" id="questionText">Starting interview...</p>
+        </div>
+
+        <div class="audio-player-container" id="audioPlayerContainer" style="display: none;">
+            <audio id="questionAudio" controls>
+                <source id="audioSource" src="" type="audio/mpeg">
+                Your browser does not support audio playback.
+            </audio>
+            <p style="color: #6b7280; font-size: 0.9em; margin-top: 10px;">
+                💡 Tip: You can pause the audio and start recording anytime!
+            </p>
+        </div>
+
+        <button class="record-button" id="recordButton" style="display: none;" onclick="toggleRecording()">
+            <span class="icon" id="recordIcon">🎤</span>
+            <span class="label" id="recordLabel">Press to Record</span>
+        </button>
+
+        <div class="transcription-display" id="transcriptionDisplay" style="display: none;">
+            <div class="transcription-label">You said:</div>
+            <div class="transcription-text" id="transcriptionText"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Generating Overlay -->
+<div class="generating-overlay" id="generatingOverlay">
+    <div class="generating-content">
+        <div style="font-size: 5em;">✨</div>
+        <h2>Creating Your Personalized Story</h2>
+        <p>This will take 2-5 minutes...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let sessionId = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let isFirstQuestion = true;
+    const prompt = "{{ prompt }}";
+
+    // Start interview on page load
+    window.addEventListener('load', async () => {
+        await startInterview();
+    });
+
+    async function startInterview() {
+        try {
+            const formData = new FormData();
+            formData.append('prompt', prompt);
+
+            const response = await fetch('/interview/start', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('Error: ' + data.error);
+                window.location.href = '/';
+                return;
+            }
+
+            sessionId = data.session_id;
+            displayQuestion(data);
+            
+        } catch (error) {
+            console.error('Error starting interview:', error);
+            alert('Failed to start interview. Please try again.');
+            window.location.href = '/';
+        }
+    }
+
+    function displayQuestion(data) {
+        document.getElementById('questionText').textContent = data.question_text;
+        document.getElementById('audioSource').src = data.question_audio;
+        const audioPlayer = document.getElementById('questionAudio');
+        audioPlayer.load();
+        document.getElementById('audioPlayerContainer').style.display = 'block';
+        
+        // Only autoplay the first question, manually play subsequent ones
+        if (isFirstQuestion) {
+            audioPlayer.play().catch(e => console.log('Autoplay prevented:', e));
+            isFirstQuestion = false;
+        } else {
+            // For subsequent questions, just show the record button immediately
+            // so user can record without waiting for audio to finish
+            document.getElementById('recordButton').style.display = 'flex';
+            // But still play the audio
+            audioPlayer.play().catch(e => console.log('Play prevented:', e));
+        }
+        
+        // Show record button after audio finishes OR immediately if user skips
+        audioPlayer.onended = () => {
+            document.getElementById('recordButton').style.display = 'flex';
+        };
+        
+        // Also show button if audio is paused manually
+        audioPlayer.onpause = () => {
+            if (audioPlayer.currentTime > 0) {
+                document.getElementById('recordButton').style.display = 'flex';
+            }
+        };
+        
+        // Update progress dots
+        updateProgressDots(data.question_number - 1, data.total_questions);
+    }
+
+    function updateProgressDots(currentIdx, total) {
+        const dots = document.querySelectorAll('.progress-dot');
+        dots.forEach((dot, idx) => {
+            dot.classList.remove('active', 'completed');
+            if (idx < currentIdx) {
+                dot.classList.add('completed');
+            } else if (idx === currentIdx) {
+                dot.classList.add('active');
+            }
+        });
+    }
+
+    async function toggleRecording() {
+        if (!isRecording) {
+            await startRecording();
+        } else {
+            await stopRecording();
+        }
+    }
+
+    async function startRecording() {
+        try {
+            // Pause the question audio if it's playing
+            const audioPlayer = document.getElementById('questionAudio');
+            if (audioPlayer && !audioPlayer.paused) {
+                audioPlayer.pause();
+            }
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.addEventListener('dataavailable', event => {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener('stop', async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                await submitAnswer(audioBlob);
+            });
+
+            mediaRecorder.start();
+            isRecording = true;
+
+            // Update button
+            document.getElementById('recordButton').classList.add('recording');
+            document.getElementById('recordIcon').textContent = '⏹️';
+            document.getElementById('recordLabel').textContent = 'Stop Recording';
+
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            alert('Could not access microphone. Please check permissions.');
+        }
+    }
+
+    async function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            isRecording = false;
+
+            // Update button
+            document.getElementById('recordButton').classList.remove('recording');
+            document.getElementById('recordIcon').textContent = '⏳';
+            document.getElementById('recordLabel').textContent = 'Processing...';
+            document.getElementById('recordButton').disabled = true;
+        }
+    }
+
+    async function submitAnswer(audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            formData.append('audio', audioBlob, 'answer.webm');
+
+            const response = await fetch('/interview/answer', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+
+            // Show transcription
+            document.getElementById('transcriptionText').textContent = data.transcription;
+            document.getElementById('transcriptionDisplay').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('transcriptionDisplay').style.display = 'none';
+            }, 3000);
+
+            if (data.complete) {
+                // Interview complete - generate story
+                document.getElementById('generatingOverlay').classList.add('active');
+                await generateStory();
+            } else {
+                // Next question
+                document.getElementById('recordButton').style.display = 'none';
+                document.getElementById('recordButton').disabled = false;
+                document.getElementById('recordIcon').textContent = '🎤';
+                document.getElementById('recordLabel').textContent = 'Press to Record';
+                displayQuestion(data);
+            }
+
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+            alert('Failed to process answer. Please try again.');
+            document.getElementById('recordButton').disabled = false;
+        }
+    }
+
+    async function generateStory() {
+        try {
+            const response = await fetch(`/interview/generate/${sessionId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Error generating story: ' + data.error);
+                window.location.href = '/';
+            }
+
+        } catch (error) {
+            console.error('Error generating story:', error);
+            alert('Failed to generate story. Please try again.');
+            window.location.href = '/';
+        }
+    }
+</script>
+{% endblock %}

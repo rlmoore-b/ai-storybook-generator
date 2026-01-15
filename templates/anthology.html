@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Story Anthology - AI Storybook Generator{% endblock %}
+
+{% block extra_styles %}
+    .anthology-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .anthology-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .anthology-header h1 {
+        font-family: 'Playfair Display', serif;
+        color: #fbbf24;
+        font-size: 3.2em;
+        margin-bottom: 15px;
+        text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        font-weight: 700;
+    }
+
+    .anthology-header p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.3em;
+        font-weight: 300;
+    }
+
+    .stories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .story-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .story-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(251, 191, 36, 0.3), 0 0 40px rgba(251, 191, 36, 0.2);
+    }
+
+    .story-thumbnail {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .story-card:hover .story-thumbnail img {
+        transform: scale(1.08);
+    }
+
+    .no-image {
+        font-size: 4em;
+        color: #cbd5e1;
+    }
+
+    .story-info {
+        padding: 25px;
+    }
+
+    .story-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        color: #1e3a8a;
+        margin-bottom: 12px;
+        font-weight: 700;
+        line-height: 1.3;
+        min-height: 60px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .story-date {
+        color: #6b7280;
+        font-size: 0.95em;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .story-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95em;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-read {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #1e3a8a;
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    }
+
+    .btn-read:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    .empty-state-icon {
+        font-size: 6em;
+        margin-bottom: 20px;
+        opacity: 0.6;
+    }
+
+    .empty-state h2 {
+        font-family: 'Playfair Display', serif;
+        color: #fbbf24;
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2em;
+        margin-bottom: 30px;
+    }
+
+    .empty-state a {
+        display: inline-block;
+        padding: 15px 35px;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #1e3a8a;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+    }
+
+    .empty-state a:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(251, 191, 36, 0.5);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .anthology-header h1 {
+            font-size: 2.5em;
+        }
+
+        .stories-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .story-card {
+            border-radius: 16px;
+        }
+
+        .story-thumbnail {
+            height: 200px;
+        }
+
+        .story-info {
+            padding: 20px;
+        }
+
+        .story-title {
+            font-size: 1.3em;
+            min-height: auto;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="anthology-container">
+    <div class="anthology-header">
+        <h1>📚 Your Story Anthology</h1>
+        <p>A collection of magical tales</p>
+    </div>
+
+    {% if stories %}
+    <div class="stories-grid">
+        {% for story in stories %}
+        <div class="story-card">
+            <div class="story-thumbnail">
+                {% if story.first_image %}
+                    <img src="{{ url_for('static', filename=story.first_image.image_filename) }}" alt="{{ story.title }}">
+                {% else %}
+                    <div class="no-image">📖</div>
+                {% endif %}
+            </div>
+            <div class="story-info">
+                <h2 class="story-title">{{ story.title }}</h2>
+                <div class="story-date">
+                    <span>🕒</span>
+                    <span>{{ story.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+                <div class="story-actions">
+                    <a href="{{ url_for('view_story', story_uuid=story.uuid) }}" class="btn btn-read">
+                        Read Story 📖
+                    </a>
+                    <form method="POST" action="{{ url_for('delete_story', story_uuid=story.uuid) }}" style="flex: 0 0 auto;" onsubmit="return confirm('Are you sure you want to delete this story? This action cannot be undone.');">
+                        <button type="submit" class="btn btn-delete" style="padding: 12px 16px;">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📚</div>
+        <h2>Your Anthology Awaits</h2>
+        <p>You haven't created any stories yet. Let's start your magical journey!</p>
+        <a href="{{ url_for('index') }}">Create Your First Story ✨</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

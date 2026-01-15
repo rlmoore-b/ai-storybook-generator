@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}{{ story.title }} - AI Storybook Generator{% endblock %}
+
+{% block extra_styles %}
+    .story-container {
+        max-width: 750px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .story-wrapper {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .story-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .story-title {
+        font-family: 'Playfair Display', serif;
+        color: #fbbf24;
+        font-size: 2.8em;
+        margin-bottom: 20px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+    }
+
+    .story-meta {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .story-meta span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .audio-player {
+        margin: 30px auto;
+        text-align: center;
+    }
+
+    .audio-player audio {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 50px;
+        filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.2));
+    }
+
+    .story-content {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .story-image {
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto;
+        display: block;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border: 3px solid rgba(251, 191, 36, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .story-image:hover {
+        transform: scale(1.02);
+    }
+
+    .story-text {
+        color: #f3f4f6;
+        font-size: 1.2em;
+        line-height: 1.9;
+        margin-bottom: 25px;
+        text-align: justify;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* First paragraph drop cap */
+    .story-text:first-of-type::first-letter {
+        font-family: 'Playfair Display', serif;
+        font-size: 4em;
+        line-height: 0.85;
+        float: left;
+        margin-right: 0.05em;
+        margin-top: 0.08em;
+        color: #fbbf24;
+        font-weight: 700;
+        text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        padding: 0;
+    }
+
+    .story-separator {
+        text-align: center;
+        margin: 40px 0;
+        color: rgba(251, 191, 36, 0.5);
+        font-size: 1.5em;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 40px;
+        padding: 14px 28px;
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+        text-decoration: none;
+        border-radius: 12px;
+        border: 2px solid rgba(251, 191, 36, 0.3);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .back-link:hover {
+        background: rgba(251, 191, 36, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+    }
+
+    .no-content {
+        text-align: center;
+        padding: 40px;
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .story-wrapper {
+            padding: 30px 25px;
+            border-radius: 20px;
+        }
+
+        .story-title {
+            font-size: 2.2em;
+        }
+
+        .story-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .story-text:first-of-type::first-letter {
+            font-size: 3.5em;
+            margin-right: 0.08em;
+        }
+
+        .story-image {
+            margin: 30px auto;
+        }
+
+        .audio-player audio {
+            width: 100%;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="story-container">
+    <div class="story-wrapper">
+        <div class="story-header">
+            <h1 class="story-title">{{ story.title }}</h1>
+            <div class="story-meta">
+                <span>
+                    <span>📅</span>
+                    <span>{{ story.created_at.strftime('%B %d, %Y') }}</span>
+                </span>
+                <span>•</span>
+                <span>
+                    <span>🕒</span>
+                    <span>{{ story.created_at.strftime('%I:%M %p') }}</span>
+                </span>
+            </div>
+        </div>
+
+        {% if story.audio_filename %}
+        <div class="audio-player">
+            <audio controls>
+                <source src="{{ url_for('static', filename=story.audio_filename) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        {% endif %}
+
+        <div class="story-content">
+            {% if paragraphs %}
+                {% for paragraph in paragraphs %}
+                    {% if paragraph.strip() %}
+                        <p class="story-text">{{ paragraph }}</p>
+                        
+                        {% if story.images and loop.index0 < story.images|length %}
+                            <img src="{{ url_for('static', filename=story.images[loop.index0].image_filename) }}" 
+                                 alt="Story illustration {{ loop.index }}" 
+                                 class="story-image">
+                        {% endif %}
+                        
+                        {% if not loop.last %}
+                            <div class="story-separator">✦ ✦ ✦</div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="no-content">No story content available.</p>
+            {% endif %}
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ url_for('anthology') }}" class="back-link">
+                ← Back to Anthology
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

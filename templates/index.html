@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %}Create a Story - AI Storybook Generator{% endblock %}
+
+{% block extra_styles %}
+    .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .magical-card {
+        background: white;
+        border-radius: 24px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 80px rgba(251, 191, 36, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Magical shimmer effect */
+    .magical-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent 30%,
+            rgba(251, 191, 36, 0.1) 50%,
+            transparent 70%
+        );
+        animation: shimmer 3s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 35px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-header h1 {
+        font-family: 'Playfair Display', serif;
+        color: #1e3a8a;
+        font-size: 2.8em;
+        margin-bottom: 12px;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 1.15em;
+        font-weight: 400;
+    }
+
+    .form-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+    }
+
+    label {
+        display: block;
+        color: #374151;
+        font-size: 1.1em;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        font-size: 1.05em;
+        font-family: 'Nunito', sans-serif;
+        resize: vertical;
+        min-height: 160px;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06);
+        background: #fafafa;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #fbbf24;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(251, 191, 36, 0.1);
+        background: white;
+    }
+
+    .example {
+        color: #9ca3af;
+        font-size: 0.95em;
+        margin-top: 10px;
+        font-style: italic;
+        line-height: 1.6;
+    }
+
+    /* Magical Generate Button */
+    .magical-button {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+        color: #1e3a8a;
+        border: none;
+        border-radius: 16px;
+        font-size: 1.3em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .magical-button::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .magical-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(251, 191, 36, 0.5);
+    }
+
+    .magical-button:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .magical-button:active {
+        transform: translateY(-1px);
+    }
+
+    .magical-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Button Container */
+    .button-container {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .button-container .magical-button {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    /* Interview Button */
+    .interview-button {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+    }
+
+    .interview-button:hover {
+        box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5);
+    }
+
+    .button-subtitle {
+        font-size: 0.75em;
+        opacity: 0.9;
+        font-weight: 400;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        border-left: 4px solid #3b82f6;
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .info-box p {
+        color: #1e40af;
+        margin: 6px 0;
+        font-size: 0.95em;
+        line-height: 1.6;
+    }
+
+    .info-box strong {
+        font-weight: 700;
+    }
+
+    .error {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #f87171;
+        color: #991b1b;
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    /* Magical Loading Overlay */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(30, 58, 138, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+        color: white;
+    }
+
+    .magic-wand {
+        font-size: 5em;
+        animation: wand-wave 2s ease-in-out infinite;
+        display: inline-block;
+        filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8));
+    }
+
+    @keyframes wand-wave {
+        0%, 100% { transform: rotate(-10deg); }
+        50% { transform: rotate(10deg); }
+    }
+
+    .sparkles {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        margin: -50px 0 0 -50px;
+    }
+
+    .sparkle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #fbbf24;
+        border-radius: 50%;
+        animation: sparkle-float 2s ease-in-out infinite;
+        box-shadow: 0 0 10px #fbbf24;
+    }
+
+    .sparkle:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 20%; left: 80%; animation-delay: 0.3s; }
+    .sparkle:nth-child(3) { top: 80%; left: 20%; animation-delay: 0.6s; }
+    .sparkle:nth-child(4) { top: 80%; left: 80%; animation-delay: 0.9s; }
+    .sparkle:nth-child(5) { top: 50%; left: 10%; animation-delay: 1.2s; }
+    .sparkle:nth-child(6) { top: 50%; left: 90%; animation-delay: 1.5s; }
+
+    @keyframes sparkle-float {
+        0%, 100% { 
+            transform: translateY(0) scale(1);
+            opacity: 0;
+        }
+        50% { 
+            transform: translateY(-20px) scale(1.5);
+            opacity: 1;
+        }
+    }
+
+    .loading-text {
+        font-family: 'Playfair Display', serif;
+        font-size: 2em;
+        margin-top: 40px;
+        font-weight: 700;
+        text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    }
+
+    .loading-subtext {
+        font-size: 1.1em;
+        margin-top: 15px;
+        opacity: 0.9;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+
+    .loading-dots {
+        display: inline-block;
+        margin-left: 5px;
+    }
+
+    .loading-dots span {
+        animation: dot-pulse 1.5s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    .loading-dots span:nth-child(1) { animation-delay: 0s; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dot-pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .magical-card {
+            padding: 30px 25px;
+            border-radius: 20px;
+        }
+
+        .form-header h1 {
+            font-size: 2.2em;
+        }
+
+        textarea {
+            min-height: 140px;
+            padding: 16px;
+        }
+
+        .magical-button {
+            font-size: 1.1em;
+            padding: 16px;
+        }
+
+        .button-container {
+            flex-direction: column;
+        }
+
+        .button-container .magical-button {
+            width: 100%;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="magical-card">
+        <div class="form-header">
+            <h1>✨ Create Your Story</h1>
+            <p class="subtitle">Let AI weave your imagination into a magical tale</p>
+        </div>
+
+        <div class="form-content">
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="info-box">
+                <p><strong>⏱️ Enchantment Time:</strong> Story generation takes 2-5 minutes</p>
+                <p><strong>🎨 Magical Features:</strong> Custom illustrations, quality refinement & audio narration</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('generate') }}" id="storyForm">
+                <div class="form-group">
+                    <label for="prompt">What magical tale shall we create today?</label>
+                    <textarea 
+                        name="prompt" 
+                        id="prompt" 
+                        placeholder="A brave little dragon who discovers the magic of friendship in an enchanted forest..."
+                        required
+                    ></textarea>
+                    <p class="example">
+                        ✨ <strong>Story Ideas:</strong> A dragon learning to fly • A robot discovering emotions • Friends exploring a magical library • An underwater adventure
+                    </p>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="magical-button" id="submitBtn">
+                        <span>Generate Story</span> 🚀
+                        <span class="button-subtitle">Quick Generation</span>
+                    </button>
+                    <button type="button" class="magical-button interview-button" id="interviewBtn" onclick="startInterview()">
+                        <span>Audio Interview</span> 🎙️
+                        <span class="button-subtitle">Personalize with voice</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Magical Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="magic-wand">✨</div>
+        <div class="sparkles">
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+        </div>
+        <div class="loading-text">Weaving Your Story</div>
+        <div class="loading-subtext">
+            Creating magic<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('storyForm').addEventListener('submit', function(e) {
+        // Show loading overlay
+        document.getElementById('loadingOverlay').classList.add('active');
+        
+        // Disable button
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span>Generating Magic</span> ✨';
+    });
+
+    function startInterview() {
+        const prompt = document.getElementById('prompt').value.trim();
+        
+        if (!prompt) {
+            alert('Please enter your story idea first!');
+            document.getElementById('prompt').focus();
+            return;
+        }
+        
+        // Redirect to interview page with prompt
+        window.location.href = `/interview?prompt=${encodeURIComponent(prompt)}`;
+    }
+</script>
+{% endblock %}
