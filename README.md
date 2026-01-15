@@ -1,4 +1,5 @@
 # AI Storybook Generator
+[Diagram.pdf](https://github.com/user-attachments/files/24629861/Diagram.pdf)
 
 An intelligent web application that creates personalized, illustrated children's stories with AI-powered narration.
 
