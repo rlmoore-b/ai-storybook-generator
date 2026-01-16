@@ -1,13 +1,5 @@
 
-"""
-DEPRECATED: Original CLI Version
 
-This file contains the original command-line interface implementation of the 
-story generator. It has been superseded by the Flask web application (app.py).
-
-This file is kept for the assignment requirement comment.
-
-"""
 """
 Before submitting the assignment, describe here in a few sentences what you would have built next if you spent 2 more hours on this project:
 
