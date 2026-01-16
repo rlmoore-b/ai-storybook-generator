@@ -29,7 +29,7 @@ Date: January 2026
 import os
 from openai import OpenAI
 from utils import call_model
-
+from prompts.interview_prompts import *
 # Initialize OpenAI client for audio services (TTS and Whisper)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -71,30 +71,7 @@ class StoryInterviewer:
             
         Note: Returns fallback questions if LLM parsing fails
         """
-        prompt = f"""
-        A child wants to hear a story about: "{sanitized_prompt}"
-        
-        Generate exactly 2 short, friendly follow-up questions to personalize this story.
-        
-        Guidelines:
-        - Ask about character details (names, colors, personality traits)
-        - Ask about setting or plot details (where, when, what happens)
-        - Use simple, warm language suitable for ages 5-10
-        - Keep each question under 12 words
-        - Make them open-ended but easy to answer
-        - Be specific to their story idea
-        
-        Format your response as:
-        1. [First question]
-        2. [Second question]
-        
-        Example:
-        Story: "A brave dragon learning to fly"
-        1. What color should the dragon be?
-        2. Who helps the dragon learn to fly?
-        
-        Now generate 2 questions for: "{sanitized_prompt}"
-        """
+        prompt = INTERVIEW_QUESTION_GENERATOR_PROMPT.format(sanitized_prompt=sanitized_prompt)
         
         response = call_model(prompt, temperature=0.7, max_tokens=150)
         
@@ -224,26 +201,7 @@ class StoryInterviewer:
             for qa in self.qa_pairs
         ])
         
-        prompt = f"""
-        Original story idea: "{original_prompt}"
-        
-        Additional details from conversation:
-        {qa_text}
-        
-        Rewrite this into a single, rich story prompt that naturally incorporates 
-        all the details the child provided. Keep their original idea central, but 
-        weave in the new information smoothly.
-        
-        Example:
-        Original: "A dragon learning to fly"
-        Details: 
-        - What color? → Purple with sparkles
-        - Who helps? → A wise owl named Oliver
-        Enhanced: "A story about a magnificent purple dragon with sparkles on her 
-        wings who is learning to fly, with help from her wise friend Oliver the owl"
-        
-        Write the enhanced prompt in 1-2 sentences:
-        """
+        prompt = INTERVIEW_PROMPT_SYNTHESIZER_PROMPT.format(original_prompt=original_prompt, qa_text=qa_text)
         
         enhanced = call_model(prompt, temperature=0.5, max_tokens=200)
         return enhanced.strip()

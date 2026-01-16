@@ -1,38 +1,32 @@
 # AI Storybook Generator
-[Diagram.pdf](https://github.com/user-attachments/files/24629861/Diagram.pdf)
 
-An intelligent web application that creates personalized, illustrated children's stories with AI-powered narration.
+A Flask web application that creates personalized, illustrated children's stories using AI agents with multi-stage quality control.
 
-##  Features
+## Features
 
-- ** Audio Interview Mode**: Interactive voice Q&A to personalize stories
-- ** AI-Generated Stories**: Creates unique, age-appropriate tales (ages 5-10)
-- ** Custom Illustrations**: DALL-E 3 generates consistent character artwork
-- ** Audio Narration**: Text-to-speech brings stories to life
-- ** Story Anthology**: Browse and revisit all your magical tales
-- ** Content Safety**: Built-in filtering for appropriate content
-- ** Quality Refinement**: Multi-pass AI review ensures high-quality output
+- **AI-Generated Stories**: Creates unique, age-appropriate tales (ages 5-10)
+- **Audio Interview Mode**: Interactive voice Q&A to personalize stories
+- **Custom Illustrations**: DALL-E 3 generates consistent character artwork
+- **Audio Narration**: Text-to-speech brings stories to life
+- **Story Anthology**: Browse and revisit all your generated tales
+- **Content Safety**: Built-in filtering for appropriate content
+- **Quality Refinement**: Multi-agent review ensures high-quality output
 
-##  Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- Python 3.8+
-- OpenAI API key
+- Python 3.8 or higher
+- OpenAI API key with credits
 
 ### Installation
 
-1. **Clone the repository**
-```bash
-cd "AI Agent Deployment Engineer Takehome"
-```
-
-2. **Set up environment variables**
+1. Set up environment variables:
 ```bash
 echo "OPENAI_API_KEY=your-api-key-here" > .env
 ```
 
-3. **Run the startup script**
+2. Run the startup script:
 ```bash
 ./start_server.sh
 ```
@@ -45,86 +39,133 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
-4. **Open your browser**
-```
-http://localhost:8080
-```
+3. Open your browser to `http://localhost:8080`
 
-##  Usage
+## Usage
 
 ### Creating a Story
 
 **Quick Mode:**
-1. Navigate to the homepage
-2. Enter your story prompt (e.g., "A dragon who learns to bake cookies")
-3. Click "Generate Story" 
-4. Wait 2-5 minutes for the magic to happen
-5. Enjoy your personalized illustrated story!
+1. Navigate to homepage
+2. Enter story prompt (e.g., "A dragon who learns to bake cookies")
+3. Click "Generate Story"
+4. Wait 2-5 minutes for generation
+5. Enjoy your personalized illustrated story
 
-**Audio Interview Mode (NEW!):**
-1. Navigate to the homepage
-2. Enter your basic story idea
-3. Click "Audio Interview" 
-4. Answer 2 voice questions to personalize your story
-5. Story generates automatically with your custom details!
+**Audio Interview Mode:**
+1. Navigate to homepage
+2. Enter basic story idea
+3. Click "Audio Interview"
+4. Answer 2 voice questions to personalize
+5. Story generates automatically with custom details
 
-### Browsing the Anthology
+### Managing Stories
 
-- Click "Anthology" in the navigation
-- View all your past stories
+- Click "Anthology" to view all stories
 - Click "Read Story" to revisit any tale
 - Delete stories you no longer want
 
-##  Configuration
+## Configuration
 
 ### Debug Flags
 
 Control feature generation in `services/generator.py`:
 
 ```python
-ENABLE_AUDIO = False   # Toggle audio narration
-ENABLE_IMAGES = False  # Toggle image generation
+ENABLE_AUDIO = True    # Toggle audio narration
+ENABLE_IMAGES = True   # Toggle image generation
 ```
 
-Set these to `True` when you're ready for full story generation.
+Set to `False` for faster debugging without asset generation.
 
-##  Project Structure
+## Project Structure
 
 ```
 .
-├── app.py                  # Flask application & routes
-├── models.py              # Database models (Story, StoryImage)
+├── app.py                      # Flask routes and application logic
+├── models.py                   # Database models (SQLAlchemy)
 ├── services/
-│   └── generator.py       # Core story generation logic
-├── templates/             # Jinja2 HTML templates
-│   ├── base.html
-│   ├── index.html
-│   ├── anthology.html
-│   └── story.html
-├── static/
-│   └── stories/           # Generated stories with images & audio
-├── judge.py               # Story quality evaluation
-├── revisor.py             # Story refinement logic
-├── storybook.py          # Image generation orchestration
-├── utils.py              # Model calling utilities
-└── requirements.txt      # Python dependencies
+│   ├── generator.py            # Story generation pipeline
+│   └── interviewer.py          # Audio interview service
+├── prompts/
+│   ├── story_generation_prompts.py
+│   ├── judge_prompts.py
+│   ├── revisor_prompts.py
+│   ├── interview_prompts.py
+│   └── image_prompts.py
+├── judge.py                    # Story quality evaluation (8 judges)
+├── revisor.py                  # Story refinement logic
+├── storybook.py                # Image generation with consistency
+├── utils.py                    # OpenAI API wrappers
+├── templates/                  # Jinja2 HTML templates
+├── static/stories/             # Generated content (per UUID)
+└── requirements.txt
 ```
 
-##  Development
+## How It Works
 
-### Running in Debug Mode
+The application uses a multi-stage AI pipeline:
 
-The app runs in debug mode by default on port 8080:
+1. **Sanitization**: Filters inappropriate input
+2. **Brainstorming**: Generates 3 unique story concepts
+3. **Brainstorm Quality Loop**: 4 judges evaluate and revise ideas
+4. **Planning**: Selects best concept, defines structure
+5. **Writing**: Generates full story
+6. **Story Quality Loop**: 4 judges evaluate and revise text
+7. **Asset Generation**: Creates illustrations and audio narration
 
-```python
-app.run(debug=True, host='0.0.0.0', port=8080)
-```
+See `ARCHITECTURE.md` for detailed technical documentation.
+
+## Development
 
 ### Database
 
-- Uses SQLite (`stories.db`)
-- Auto-creates tables on first run
+- SQLite database (`stories.db`)
+- Auto-creates on first run
 - Stores story metadata and file paths
 
+### Running Tests
 
+The application runs in debug mode by default. For production deployment:
+
+```bash
+gunicorn -c gunicorn.conf.py app:app
+```
+
+## Troubleshooting
+
+### Port Already in Use
+
+```bash
+lsof -ti:8080 | xargs kill -9
+```
+
+### Module Not Found
+
+Ensure you're using the correct Python environment:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 app.py
+```
+
+### OpenAI API Errors
+
+- Verify API key in `.env` file
+- Check account has available credits
+- Ensure stable internet connection
+
+## Technical Notes
+
+- Story generation takes 2-5 minutes depending on features enabled
+- Each story creates a unique folder: `static/stories/<uuid>/`
+- Character consistency maintained across illustrations using locked prompts
+- All AI calls use OpenAI models (GPT-3.5-turbo, DALL-E 3, TTS-1, Whisper-1)
+
+## Code Organization
+
+- `main.py` contains the answer to the "If I had two more hours" question
+- All production code is in the Flask application
+- Prompts are externalized in `prompts/` for maintainability
+- Services follow separation of concerns principle
 

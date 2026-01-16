@@ -2,7 +2,7 @@ import os
 import asyncio
 import requests
 from utils import acall_model, aclient
-
+from prompts.image_prompts import *
 # Ensure output directory exists
 IMAGE_DIR = "generated_images"
 if not os.path.exists(IMAGE_DIR):
@@ -12,23 +12,12 @@ if not os.path.exists(IMAGE_DIR):
 LOCKED_REVISED_PROMPT = None
 
 async def get_consistency_guide(full_story_text):
-    prompt = (
-        f"Read the following story and create a visual 'System Prompt' for an image generator. "
-        f"Describe the physical appearance of the main characters (hair, clothes, age, race), "
-        f"the setting, and the artistic style (e.g., watercolor, 3D render, cartoon). "
-        f"Keep it concise (under 50 words). \n\nStory:\n{full_story_text}"
-    )
+    prompt = CONSISTENCY_GUIDE_PROMPT.format(full_story_text=full_story_text)
     print("Extracting character consistency details...")
     return await acall_model(prompt)
 
 async def generate_image_prompt(paragraph, consistency_guide):
-    prompt = (
-        f"I need a prompt for DALL-E 3 to generate an image for a storybook.\n"
-        f"Consistency Guide (Always follow this): {consistency_guide}\n"
-        f"Current Scene Action: {paragraph}\n\n"
-        f"Write a descriptive image prompt that depicts this scene using the style "
-        f"and characters from the consistency guide. Focus on lighting and composition."
-    )
+    prompt = IMAGE_SCENE_PROMPT.format(paragraph=paragraph, consistency_guide=consistency_guide)
     return await acall_model(prompt)
 
 async def generate_dalle_image(image_prompt, index, story_folder):
