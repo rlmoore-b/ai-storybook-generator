@@ -2,6 +2,10 @@
 
 A Flask web application that creates personalized, illustrated children's stories using AI agents with multi-stage quality control.
 
+## System Architecture
+
+[View Architecture Diagram (PDF)](https://github.com/user-attachments/files/24681282/Storybook_Generator_Diagram_Robert_Moore.pdf)
+
 ## Features
 
 - **AI-Generated Stories**: Creates unique, age-appropriate tales (ages 5-10)
